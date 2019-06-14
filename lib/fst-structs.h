@@ -138,6 +138,20 @@ struct Transducer{
         }
     }
 
+    void printInit(){
+        for(auto& state: init){
+            printf("%d ", state);
+        }
+        printf("\n");
+    }
+
+    void printFinal(){
+        for(auto& state: fin){
+            printf("%d ", state);
+        }
+        printf("\n");
+    }
+
     void printStates(){
         for(auto& state: states){
             printf("%d ", state);

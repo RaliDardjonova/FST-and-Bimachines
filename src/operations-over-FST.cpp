@@ -1,4 +1,4 @@
-#include "operations-over-FST.h"
+#include "../lib/operations-over-FST.h"
 
 std::unordered_set<int> kNewStates(int k, int from){
     std::unordered_set<int> result;
@@ -29,7 +29,6 @@ std::vector<std::pair<int, T>> mapToVector(std::unordered_map<int, std::vector<T
 
     for(auto& state : rel){
         for(auto& edge : state.second){
-            //printf("%d %d\n", state.first, edge);
             result.push_back(std::make_pair(state.first, edge));
         }
     }
@@ -51,9 +50,7 @@ std::unordered_map<int, std::vector<T>> vectorToMap(std::vector<std::pair<int, T
 }
 
 std::unordered_map<int, std::vector<int>> transClosure(std::unordered_map<int, std::vector<int>> rel){
-    //std::unordered_map<int, std::vector<int>> rel = edgesWithoutLabels(relWithLabels);
     std::vector<std::pair<int, int>> closure = mapToVector(rel);
-    printf("######\n");
     int i = 0;
     while(i != closure.size()){
         int from = closure[i].first;
@@ -66,7 +63,6 @@ std::unordered_map<int, std::vector<int>> transClosure(std::unordered_map<int, s
                 }
             }
         }
-        //printf("---- %d %d %d %d----\n", from, thru, i, closure.size());
         i++;
     }
     return vectorToMap(closure);
@@ -140,13 +136,11 @@ Transducer removeEpsilon(Transducer t){
     }
     Transducer result = Transducer(t);
     result.delta  = newDelta;
-    //result.printEdges();
     for(auto& init : t.init){
         for(auto& epsilonEdge : epsilonClosure.at(init)){
             result.init.insert(epsilonEdge.end);
         }
     }
-    //result = remap(result, 0);
     return result;
 }
 
@@ -163,7 +157,6 @@ std::unordered_set<int> intersectionSets(std::unordered_set<int> first, std::uno
 
 Transducer trim(Transducer t){
     std::unordered_map<int, std::vector<int>> closure = transClosure(edgesWithoutLabels(t.delta));
-    printf("~~~~~~~~~~~\n");
     Transducer result = Transducer();
     result.alphabet = t.alphabet;
 
@@ -290,7 +283,6 @@ transEpsilonUpperTapeClosure(std::unordered_map<int, std::vector<Edge>> epsilonR
 }
 
 Transducer removeUpperEpsilon(Transducer t, std::vector<std::string>& words, bool& isInf){
-    //bool isFinite = false;
     std::unordered_map<int, std::vector<Edge>> epsilonRel;
     std::unordered_map<int, std::vector<Edge>> epsilonClosure;
     std::unordered_map<int, std::vector<Edge>> revereseEpsilonClosure;
@@ -359,7 +351,6 @@ Transducer removeUpperEpsilon(Transducer t, std::vector<std::string>& words, boo
             int to = edge.end;
 
             if(edge.firstTape != ""){
-                //result.insertEdge(from, edge.firstTape, edge.secondTape, to);
 
                 for(auto& reverseEdge : revereseEpsilonClosure.at(from) ){
                     for(auto& forwardEdge : epsilonClosure.at(to)){

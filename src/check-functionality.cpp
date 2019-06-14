@@ -1,47 +1,7 @@
-#include<stdio.h>
-#include<unordered_set>
-#include<string>
-#include<unordered_map>
-#include<vector>
-#include<boost/functional/hash.hpp> // boos::hash_combine
-#include "construct-fst.h"
-#include "operations-over-FST.h"
+#include "../lib/construct-fst.h"
+#include "../lib/operations-over-FST.h"
+#include "../lib/check-functionality.h"
 
-struct pair_hash{
-    std::size_t operator () (const std::pair<int,int>& p) const {
-        std::size_t seed = 0;
-        boost::hash_combine(seed, p.first);
-        boost::hash_combine(seed, p.second);
-
-        return seed;
-    }
-};
-
-struct sq_edges_hash{
-    std::size_t operator () (const std::pair<std::pair<std::string, std::string>, std::pair<int, int>>& p) const {
-        std::size_t seed = 0;
-        boost::hash_combine(seed, p.first.first);
-        boost::hash_combine(seed, p.first.second);
-        boost::hash_combine(seed, p.second.first);
-        boost::hash_combine(seed, p.second.first);
-
-        return seed;
-    }
-};
-
-struct sq_comparator{
-    bool operator()(const std::pair<std::pair<std::string, std::string>, std::pair<int, int>>& firstObj,
-                    const std::pair<std::pair<std::string, std::string>, std::pair<int, int>>& secondObj) const{
-                        if(firstObj.first.first == secondObj.first.first &&
-                           firstObj.first.second == secondObj.first.second &&
-                           firstObj.second.first == secondObj.second.first &&
-                           firstObj.second.second == secondObj.second.second){
-                               return true;
-                           } else {
-                               return false;
-                           }
-                    }
-};
 
 Transducer squaredOutputTransducer(Transducer t){
     Transducer result = Transducer();
@@ -59,21 +19,17 @@ Transducer squaredOutputTransducer(Transducer t){
             firstFreeState++;
         }
     }
-    printf("------\n");
     int i = 0;
     while(i != sqStates.size()){
-        //printf("## %d %d\n", i, sqStates.size() );
         int firstState = sqStates[i].first;
         int secondState = sqStates[i].second;
         std::vector<Edge> firstEdges;
         std::vector<Edge> secondEdges;
         std::unordered_set<std::pair<std::pair<std::string, std::string>, std::pair<int, int>>, sq_edges_hash, sq_comparator> sqEdges;
-        printf("*** %d %d \n", firstState, secondState);
 
         if(t.delta.find(firstState) != t.delta.end()){
             for(auto& edge : t.delta.at(firstState)){
                 firstEdges.push_back(edge);
-                printf("edge: %s %s %d\n", edge.firstTape.c_str(), edge.secondTape.c_str(), edge.end);
             }
         }
 
@@ -85,7 +41,6 @@ Transducer squaredOutputTransducer(Transducer t){
 
         for(auto& firstEdge : firstEdges){
             for(auto& secondEdge : secondEdges){
-                printf("^^^ %d %d", firstEdge.end, secondEdge.end);
                 if(firstEdge.firstTape == secondEdge.firstTape){
                     std::pair<std::string, std::string> label =
                             std::make_pair(firstEdge.secondTape, secondEdge.secondTape);
@@ -114,9 +69,6 @@ Transducer squaredOutputTransducer(Transducer t){
             result.insertEdge(from, newEdge);
         }
         i++;
-        printf("+++++++++++\n");
-        //result.printEdges();
-
     }
 
     for(auto& state : sqStates){
@@ -165,19 +117,14 @@ advance(std::pair<std::string, std::string> firstPair,
     std::string concatFirst = firstPair.first + secondPair.first;
     std::string concatSecond = firstPair.second + secondPair.second;
     std::string commonPref = commonPrefix(concatFirst, concatSecond);
-    //printf("commonPref: %s\n", commonPref.c_str());
     auto result = std::make_pair(remainderSuffix(commonPref, concatFirst),
                                  remainderSuffix(commonPref, concatSecond));
-    //printf("remainderSuffix 1: %s\n", result.first.c_str());
-    //printf("remainderSuffix 2: %s\n", result.second.c_str());
     return result;
 }
 
 bool balancible(std::pair<std::string,  std::string> adv){
     return (adv.first == "") || (adv.second == "");
 }
-
-
 
 bool testFunctionality(Transducer t){
     std::vector<std::string> epsilonCorrespondingWords;
@@ -197,7 +144,6 @@ bool testFunctionality(Transducer t){
 
     int i = 0;
     while(isFunc && i != admissibleAdv.size()){
-        printf("i: %d, size: %d\n", i, admissibleAdv.size());
         int from = admissibleAdv[i].first;
         std::pair<std::string, std::string> fromAdvances = admissibleAdv[i].second;
 
@@ -239,88 +185,4 @@ bool testFunctionality(Transducer t){
         i++;
     }
     return isFunc;
-}
-
-
-int main(){
-/*    Transducer t = Transducer();
-    std::vector<Edge> emptyEdges;
-    t.insertEdge(1, "a", "b", 2);
-    t.insertEdge(1, "a", "c", 2);
-    t.insertEdge(2, "h", "b", 2);
-    t.insertEdge(2, "i", "w", 2);
-    t.init.insert(1);
-    t.fin.insert(2);
-    t.printEdges();
-    printf("***********\n" );
-    Transducer newT = Transducer();
-    newT.insertEdge(1, "a", "b", 2);
-    newT.insertEdge(1, "a", "c", 2);
-    newT.insertEdge(2, "h", "b", 2);
-    newT.insertEdge(2, "i", "w", 2);
-    newT.init.insert(1);
-    newT.fin.insert(2);
-    newT.printEdges();
-    printf("***********\n" );
-    Transducer unionT = starFST(t);
-    unionT.printEdges();
-*/
-
-    //Transducer t = constructFST("(((<a,b>*)|<c,ds>)<dd,zz>)*");
-    Transducer t = constructFST("<Ca,ca>(<t,t>|<x,s>)");
-    //t.printEdges();
-    //t.printStates();
-    //t.delta = transEpsilonClosure(t.delta);
-    //printf("***********\n" );
-    //transEpsilonClosure(t.delta).printEdges();
-    //printf("***********\n" );
-    //t = removeEpsilon(t);
-    //t = trim(t);
-    //t.printEdges();
-    //printf("***********\n" );
-
-    //t = expand(t);
-    //t.printEdges();
-    //printf("***********\n" );
-    //bool isInf = 0;
-    //std::vector<std::string> words;
-    //t = realTime(t, words, isInf);
-    //t.printEdges();
-    printf("***********\n" );
-
-    Transducer sqT = squaredOutputTransducer(t);
-    sqT.printEdges();
-//    t = remap(t, 0);
-    //t.printEdges();
-    /*std::unordered_map<int, std::vector<int>> closure = transClosure(edgesWithoutLabels(t.delta));
-
-    for(auto& state: closure){
-        for(auto& to : state.second){
-            printf("<%d, %d>\n", state.first, to);
-        }
-    }
-*/
-    for(auto& state: t.states){
-        printf("%d ", state);
-    }
-    printf("--\n" );
-    for(auto& init: t.init){
-        printf("%d ", init);
-    }
-    printf("--\n" );
-    for(auto& fin: t.fin){
-        printf("%d ", fin);
-    }
-
-    std::string a = "aasdfz";
-    std::string b = "aasdfzq1";
-
-    std::string a2 = "q1wert";
-    std::string b2 = "wq1z";
-
-    printf("$$$ %s \n", advance(std::make_pair(a, b), std::make_pair(a2, b2)).second.c_str());
-
-    printf("t is functional: %d\n", testFunctionality(t));
-    //t.insertEdge(1, 'a', 'b', 2);
-    //t.printEdges();
 }

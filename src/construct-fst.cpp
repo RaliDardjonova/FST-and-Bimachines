@@ -1,5 +1,4 @@
-#include "construct-fst.h"
-
+#include "../lib/construct-fst.h"
 
 Transducer remap(Transducer& t, int lastState){
     std::unordered_map<int, int> map;
@@ -37,6 +36,7 @@ Transducer remap(Transducer& t, int lastState){
 Transducer unionFST(Transducer first, Transducer second){
     Transducer remapSecond = remap(second, first.numStates());
     Transducer unionT = Transducer(first);
+    unionT.alphabet.insert(remapSecond.alphabet.begin(), remapSecond.alphabet.end());
     unionT.init.insert(remapSecond.init.begin(), remapSecond.init.end());
     unionT.fin.insert(remapSecond.fin.begin(), remapSecond.fin.end());
     unionT.delta.insert(remapSecond.delta.begin(), remapSecond.delta.end());
@@ -49,6 +49,7 @@ Transducer concatFST(Transducer first, Transducer second){
     Transducer remapSecond = remap(second, first.numStates());
     Transducer concatT = Transducer();
     concatT.alphabet = first.alphabet;
+    concatT.alphabet.insert(remapSecond.alphabet.begin(), remapSecond.alphabet.end());
     concatT.init = first.init;
     concatT.fin = remapSecond.fin;
     concatT.delta = first.delta;
@@ -86,27 +87,31 @@ Transducer starFST(Transducer t){
 }
 
 Transducer initFST(std::string regex){
-    //printf("%s\n", regex.c_str());
     int i = 0;
     while(regex[i] != ','){
         i++;
     }
     std::string firstTape = regex.substr(1, i-1);
     std::string secondTape = regex.substr(i+1, regex.size()-i-2);
-    //printf("-%s-\n", firstTape.c_str());
-    //printf("-%s-\n", secondTape.c_str());
+
     Transducer result = Transducer();
+
+    for(auto& letter : firstTape){
+        result.alphabet.insert(letter);
+    }
+    for(auto& letter : secondTape){
+        result.alphabet.insert(letter);
+    }
+
     result.insertEmptyState(1);
     result.insertEmptyState(2);
     result.addInitialState(1);
     result.addFinalState(2);
     result.insertEdge(1, firstTape, secondTape, 2);
-    result.printStates();
     return result;
 }
 
 Transducer constructFST(std::string regex){
-    printf("%s\n", regex.c_str());
     int flag = 1;
     int scopeDiff = 1;
     int secondStartPos;
@@ -132,37 +137,30 @@ Transducer constructFST(std::string regex){
 
 
         std::string firstPart = regex.substr(1, i-2);
-        //printf("%s\n", firstPart.c_str());
 
         if(i < regex.size() && regex[i] == '*'){
             firstT = starFST(constructFST(firstPart));
             secondStartPos = i+1;
-            //printf("%s\n", firstPart.c_str());
         } else {
             firstT = constructFST(firstPart);
             secondStartPos = i;
-            //printf("%s\n", firstPart.c_str());
-            //firstT.printEdges();
         }
 
     } else {
         int i = 1;
-        //printf("%c\n", regex[0]);
         if(regex[0] == '<'){
             while(regex[i] != '>'){
                 i++;
             }
             i++;
-            //int secondStartPos;
+
             std::string firstPart = regex.substr(0, i);
-            //printf("%s\n", firstPart.c_str());
             if(i < regex.size() && regex[i] == '*'){
                 firstT = starFST(initFST(firstPart));
                 secondStartPos = i+1;
             } else {
                 firstT = initFST(firstPart);
                 secondStartPos = i;
-                //firstT.printEdges();
             }
         } else {
             return Transducer();
@@ -174,17 +172,13 @@ Transducer constructFST(std::string regex){
             std::string secondPart = regex.substr(secondStartPos+1);
             Transducer secondT = constructFST(secondPart);
             result = unionFST(firstT, secondT);
-            //printf("%s\n", secondPart.c_str());
         } else {
             std::string secondPart = regex.substr(secondStartPos);
             Transducer secondT = constructFST(secondPart);
             result = concatFST(firstT, secondT);
-            //printf("%s\n", secondPart.c_str());
         }
     } else {
         result = firstT;
     }
-    printf("/////////");
-    result.printStates();
     return result;
 }
