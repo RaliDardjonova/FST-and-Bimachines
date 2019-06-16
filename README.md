@@ -24,4 +24,13 @@ Example:
 
 This program will construct a bimachine, because the corresponding transducer is
 functional. Then the user can enter a word over the alphabet {a, b}.
-The result of the program will be the same string, but uppercase.
+The result of the program will be the same string, but uppercase. 
+The same result can be obtained using the regex (<a,A>|<b,B>)\*
+
+The parsing of the regex must be improved, becuse currently a subregex constructed 
+by concatenation must be surrounded by backets before applying the union operation.
+For example:
+./bm "(<a,A>\*<b,B>\*|<c,C>)\*"
+This program will not run properly, because <a,A>\*<b,B>\* must be in brackets.
+The correct form of runnig the program will be:
+./bm "((<a,A>\*<b,B>\*)|<c,C>)\*"
