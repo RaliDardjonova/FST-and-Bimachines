@@ -2,7 +2,7 @@
 
 These are programs implementing some important functions with
 transducers and bimachines.
-This program construct bimachine by regex if the transducer is functional:
+This program construct bimachine by regex if the transducer is functional.
 
 To compile the project you can run:
 $  g++ src/main.cpp -o bm src/bimachine.cpp src/check-functionality.cpp src/operations-over-FST.cpp src/construct-fst.cpp
