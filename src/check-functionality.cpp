@@ -127,7 +127,7 @@ bool balancible(std::pair<std::string,  std::string> adv){
 }
 
 bool testFunctionality(Transducer t){
-    std::vector<std::string> epsilonCorrespondingWords;
+    std::unordered_set<std::string> epsilonCorrespondingWords;
     bool isInf;
     std::vector<std::pair<int, std::pair<std::string, std::string>>> admissibleAdv;
     Transducer realTimeT = realTime(t, epsilonCorrespondingWords, isInf);

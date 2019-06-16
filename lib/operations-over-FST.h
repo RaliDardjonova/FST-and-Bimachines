@@ -17,5 +17,5 @@ Transducer removeEpsilon(Transducer t);
 Transducer trim(Transducer t);
 std::string sigma(std::string alpha, int i);
 Transducer expand(Transducer t);
-Transducer removeUpperEpsilon(Transducer t, std::vector<std::string>& words, bool& isInf);
-Transducer realTime(Transducer t, std::vector<std::string>& words, bool& isInf);
+Transducer removeUpperEpsilon(Transducer t, std::unordered_set<std::string>& words, bool& isInf);
+Transducer realTime(Transducer t, std::unordered_set<std::string>& words, bool& isInf);

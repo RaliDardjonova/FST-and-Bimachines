@@ -282,7 +282,7 @@ transEpsilonUpperTapeClosure(std::unordered_map<int, std::vector<Edge>> epsilonR
     return result;
 }
 
-Transducer removeUpperEpsilon(Transducer t, std::vector<std::string>& words, bool& isInf){
+Transducer removeUpperEpsilon(Transducer t, std::unordered_set<std::string>& words, bool& isInf){
     std::unordered_map<int, std::vector<Edge>> epsilonRel;
     std::unordered_map<int, std::vector<Edge>> epsilonClosure;
     std::unordered_map<int, std::vector<Edge>> revereseEpsilonClosure;
@@ -329,7 +329,7 @@ Transducer removeUpperEpsilon(Transducer t, std::vector<std::string>& words, boo
         if(t.init.find(state.first) != t.init.end()){
             for(auto& edge : state.second){
                 if(t.fin.find(edge.end) != t.fin.end()){
-                    words.push_back(edge.secondTape);
+                    words.insert(edge.secondTape);
                 }
             }
         }
@@ -370,8 +370,9 @@ Transducer removeUpperEpsilon(Transducer t, std::vector<std::string>& words, boo
     return result;
 }
 
-Transducer realTime(Transducer t, std::vector<std::string>& words, bool& isInf){
+Transducer realTime(Transducer t, std::unordered_set<std::string>& words, bool& isInf){
     Transducer expandedT = expand(trim(removeEpsilon(trim(t))));
     Transducer result = removeUpperEpsilon(expandedT, words, isInf);
+    
     return result;
 }

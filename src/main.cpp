@@ -9,7 +9,7 @@
 int main(int argc, char *argv[]){
     std::string regex = argv[1];
     Transducer t = constructFST(regex);
-
+    printf("isFunctional: %d\n", testFunctionality(t));
     if(testFunctionality(t)){
         Bimachine bm = FSTtoBM(t);
 

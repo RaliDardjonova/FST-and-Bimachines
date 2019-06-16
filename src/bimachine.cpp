@@ -5,7 +5,7 @@ Bimachine FSTtoBM(Transducer t){
     bm.leftA.alphabet = t.alphabet;
     bm.rightA.alphabet = t.alphabet;
     bool isInf;
-    std::vector<std::string> words;
+    std::unordered_set<std::string> words;
     Transducer realTimeT = realTime(t, words, isInf);
     std::unordered_map<int, std::vector<std::pair<char, int>>> reverseDelta;
 
